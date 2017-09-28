@@ -2,16 +2,17 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": { 
+		"sbAccountName": "someaccount",
     },
     "variables": {
 		"sbVersion": "[providers('Microsoft.ServiceBus', 'namespaces').apiVersions[0]]",
 		"defaultSASKeyName": "RootManageSharedAccessKey",
-		"authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', 'didago-gib', variables('defaultSASKeyName'))]"
+		"authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('sbAccountName'), variables('defaultSASKeyName'))]"
     },
     "resources": [ ],
     "outputs": {
         "ifOutput": {
-            "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', 'didago-gib', 'RootManageSharedAccessKey'), providers('Microsoft.ServiceBus', 'namespaces').apiVersions[0]).primaryConnectionString]",
+            "value": "[listkeys(variables('authRuleResourceId'), variables('sbVersion')).primaryConnectionString]",
             "type": "string"
         }
     }
