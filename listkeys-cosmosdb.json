@@ -1,0 +1,16 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": { 
+    },
+    "variables": {
+        "dbName":"some-cosmosdb-name",
+    },
+    "resources": [ ],
+    "outputs": {
+        "Output1": {
+            "value": "[Concat('AccountEndpoint=https://', variables('dbName'), '.documents.azure.com:443/;AccountKey=',listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbName')), '2015-11-06').primaryMasterKey)]",
+            "type": "string"
+        }
+    }
+}
