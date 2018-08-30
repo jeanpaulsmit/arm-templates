@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "companyName": {
+      "value": "didago"
+    },
+    "projectName": {
+      "value": "generic"
+    },
+    "environment": {
+      "value": "prd"
+    },
+    "metadata": {
+      "value": {
+        "department": "tbd",
+        "projectName": "Generic",
+        "owner": "tbd",
+        "environment": "prd"
+      }
+    },
+    "apimSkuName": {
+      "value": "Premium"
+    },
+    "apimSkuCapacity": {
+      "value": 1
+    },
+    "publisherName": {
+      "value": "Didago IT Consultancy"
+    },
+    "publisherEmail": {
+      "value": "noreply@didago.nl"
+    }
+  }
+}

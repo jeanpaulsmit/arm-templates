@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "companyName": {
+      "value": "didago"
+    },
+    "projectName": {
+      "value": "Generic"
+    },
+    "environment": {
+      "value": "dev"
+    },
+    "productNames": {
+      "value": [ "MyProduct" ]
+    },
+    "emailReceiverName": {
+      "value": "Support"
+    },
+    "emailReceiverAddress": {
+      "value": "support-dev@didago.nl"
+    },
+    "webhookName": {
+      "value": "Slack"
+    },
+    "webhookUrl": {
+      "value": "https://some-url"
+    },
+    "alertName": {
+      "value": "Capacity over 80pct alert"
+    },
+    "alertDescription": {
+      "value": "Alert when average capacity is over 80pct for a period of 5 minutes, every 5 minutes evaluated"
+    },
+    "alertSeverity": {
+      "value": 4
+    },
+    "metricName": {
+      "value": "Capacity"
+    },
+    "windowSize": {
+      "value": "PT5M"
+    },
+    "evaluationFrequency": {
+      "value": "PT5M"
+    },
+    "operator": {
+      "value": "GreaterThan"
+    },
+    "threshold": {
+      "value": "80"
+    },
+    "timeAggregation": {
+      "value": "Average"
+    }
+  }
+}

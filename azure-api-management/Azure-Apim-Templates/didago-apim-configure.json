@@ -1,0 +1,333 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "companyName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 8,
+      "metadata": {
+        "description": "Abbrevation of the company like"
+      }
+    },
+    "projectName": {
+      "type": "string",
+      "minLength": 2,
+      "metadata": {
+        "description": "Short description of the resource"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3,
+      "allowedValues": [
+        "dev",
+        "tst",
+        "acc",
+        "prd"
+      ],
+      "metadata": {
+        "description": "Abbrevation of the environment."
+      }
+    },
+    "productNames": {
+      "type": "array",
+      "metadata": {
+        "description": "List of products to create."
+      }
+    },
+    "emailReceiverName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name to describe the email receiver."
+      }
+    },
+    "emailReceiverAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Email address to send the alert notification to."
+      }
+    },
+    "webhookName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name to describe the type of webhook."
+      }
+    },
+    "webhookUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "URL to post the alert notification to"
+      }
+    },
+    "alertName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the alert"
+      }
+    },
+    "alertDescription": {
+      "type": "string",
+      "defaultValue": "This is a metric alert",
+      "metadata": {
+        "description": "Description of alert"
+      }
+    },
+    "alertSeverity": {
+      "type": "int",
+      "defaultValue": 3,
+      "allowedValues": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metadata": {
+        "description": "Severity of alert {0,1,2,3,4}"
+      }
+    },
+    "metricName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the metric used in the comparison to activate the alert."
+      }
+    },
+    "operator": {
+      "type": "string",
+      "defaultValue": "GreaterThan",
+      "allowedValues": [
+        "Equals",
+        "NotEquals",
+        "GreaterThan",
+        "GreaterThanOrEqual",
+        "LessThan",
+        "LessThanOrEqual"
+      ],
+      "metadata": {
+        "description": "Operator comparing the current value with the threshold value."
+      }
+    },
+    "threshold": {
+      "type": "string",
+      "defaultValue": "0",
+      "metadata": {
+        "description": "The threshold value at which the alert is activated."
+      }
+    },
+    "timeAggregation": {
+      "type": "string",
+      "defaultValue": "Average",
+      "allowedValues": [
+        "Average",
+        "Minimum",
+        "Maximum",
+        "Total"
+      ],
+      "metadata": {
+        "description": "How the data that is collected should be combined over time."
+      }
+    },
+    "windowSize": {
+      "type": "string",
+      "defaultValue": "PT5M",
+      "metadata": {
+        "description": "Period of time used to monitor alert activity based on the threshold. Must be between five minutes and one day. ISO 8601 duration format."
+      }
+    },
+    "evaluationFrequency": {
+      "type": "string",
+      "defaultValue": "PT1M",
+      "metadata": {
+        "description": "How often the metric alert is evaluated represented in ISO 8601 duration format"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "policyFileNameSuffix": "[concat('-policy.', parameters('environment'),'.xml')]",
+    "globalPolicyFileName": "[concat('didago-apim-global',variables('policyFileNameSuffix'))]"
+  },
+  "resources": [
+    {
+      "name": "NamingConvention",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-naming-conventions.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "companyName": {
+            "value": "[parameters('companyName')]"
+          },
+          "projectName": {
+            "value": "[parameters('projectName')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "APIM-PolicyTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-policy.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": {
+            "value": "[reference('NamingConvention').outputs.apimInstanceName.value]"
+          },
+          "policyUrl": {
+            "value": "[concat(parameters('_artifactsLocation'), '/apim-templates/', variables('globalPolicyFileName'), parameters('_artifactsLocationSasToken'))]"
+          }
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "APIM-ProductsTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-product.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": {
+            "value": "[reference('NamingConvention').outputs.apimInstanceName.value]"
+          },
+          "productNames": {
+            "value": "[parameters('productNames')]"
+          }
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "APIM-ProductsPolicyTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-product-policy.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": {
+            "value": "[reference('NamingConvention').outputs.apimInstanceName.value]"
+          },
+          "productNames": {
+            "value": "[parameters('productNames')]"
+          },
+          "policyUrl": {
+            "value": "[concat(parameters('_artifactsLocation'), '/apim-templates/products/didago-apim-product-$$productname$$', variables('policyFileNameSuffix'), parameters('_artifactsLocationSasToken'))]"
+          }
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "APIM-ActionGroupTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-action-group.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "actionGroupName": {
+            "value": "[reference('NamingConvention').outputs.actionGroupName.value]"
+          },
+          "emailReceiverName": {
+            "value": "[parameters('emailReceiverName')]"
+          },
+          "emailReceiverAddress": {
+            "value": "[parameters('emailReceiverAddress')]"
+          },
+          "webhookName": {
+            "value": "[parameters('webhookName')]"
+          },
+          "webhookUrl": {
+            "value": "[parameters('webhookUrl')]"
+          }
+        }
+      },
+      "dependsOn": [
+      ]
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(replace(parameters('alertName'),' ','-'),'-MetricAlertTemplate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-appinsights-metricalert.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": {
+            "value": "[reference('NamingConvention').outputs.apimInstanceName.value]"
+          },
+          "actionGroupName": {
+            "value": "[reference('NamingConvention').outputs.actionGroupName.value]"
+          },
+          "alertName": {
+            "value": "[parameters('alertName')]"
+          },
+          "alertDescription": {
+            "value": "[parameters('alertDescription')]"
+          },
+          "alertSeverity": {
+            "value": "[parameters('alertSeverity')]"
+          },
+          "evaluationFrequency": {
+            "value": "[parameters('evaluationFrequency')]"
+          },
+          "windowSize": {
+            "value": "[parameters('windowSize')]"
+          },
+          "metricName": {
+            "value": "[parameters('metricName')]"
+          },
+          "operator": {
+            "value": "[parameters('operator')]"
+          },
+          "threshold": {
+            "value": "[parameters('threshold')]"
+          },
+          "timeAggregation": {
+            "value": "[parameters('timeAggregation')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "APIM-ActionGroupTemplate"
+      ]
+    }
+  ],
+  "outputs": {}
+}

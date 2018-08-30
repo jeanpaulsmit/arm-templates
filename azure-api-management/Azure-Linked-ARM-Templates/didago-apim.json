@@ -1,0 +1,91 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimInstanceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the APIM instance"
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "metadata": {
+                "description": "Metadata for this resource"
+            }
+        },
+        "apimSkuName": {
+            "type": "string",
+            "defaultValue": "Developer",
+            "allowedValues": [
+                "Developer",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "Describes the pricing tier."
+            }
+        },
+        "apimSkuCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "Describes the capacity of the instance, in units."
+            }
+        },
+        "publisherEmail": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Set the e-mail address to receive all system notifications sent from API Management"
+            }
+        },
+        "publisherName": {
+            "type": "string",
+            "defaultValue": "Didago IT Consultancy",
+            "metadata": {
+                "description": "Specify the name of your organization for use in the developer portal and e-mail notifications."
+            }
+        }
+    },
+    "variables": { },
+    "resources": [
+        {
+            "type": "Microsoft.ApiManagement/service",
+            "sku": {
+                "name": "[parameters('apimSkuName')]",
+                "capacity": "[parameters('apimSkuCapacity')]"
+            },
+            "name": "[parameters('apimInstanceName')]",
+            "apiVersion": "2017-03-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "API Management",
+                "department": "[parameters('metadata').department]",
+                "projectName": "[parameters('metadata').projectName]",
+                "owner": "[parameters('metadata').owner]",
+                "environment": "[parameters('metadata').environment]"
+            },
+            "scale": null,
+            "properties": {
+                "publisherEmail": "[parameters('publisherEmail')]",
+                "publisherName": "[parameters('publisherName')]",
+                "notificationSenderEmail": "noreply@didago.nl",
+                "additionalLocations": null,
+                "virtualNetworkConfiguration": null,
+                "customProperties": {
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10": "False",
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11": "False",
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30": "False",
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168": "False",
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10": "False",
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11": "False",
+                    "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30": "False"
+                },
+                "virtualNetworkType": "None",
+                "certificates": null
+            },
+            "dependsOn": []
+        }
+    ],
+    "outputs": { }
+}

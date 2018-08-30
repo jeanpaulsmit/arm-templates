@@ -1,0 +1,142 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimInstanceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the APIM instance"
+      }
+    },
+    "actionGroupName": {
+      "type": "string",
+      "maxLength": 12,
+      "metadata": {
+        "description": "Name of the alert action group to use in this metric"
+      }
+    },
+    "alertName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the metric alert"
+      }
+    },
+    "alertDescription": {
+      "type": "string",
+      "metadata": {
+        "description": "Description of the metric alert"
+      }
+    },
+    "alertSeverity": {
+      "type": "int",
+      "defaultValue": 3,
+      "allowedValues": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metadata": {
+        "description": "Severity of alert {0,1,2,3,4}"
+      }
+    },
+    "evaluationFrequency": {
+      "type": "string",
+      "metadata": {
+        "description": "Frequency the value must be evaluated against the threshold, format ISO 8601, f.i. PT5M"
+      }
+    },
+    "windowSize": {
+      "type": "string",
+      "metadata": {
+        "description": "Size of window to use for evaluation, format ISO 8601, f.i. PT5M"
+      }
+    },
+    "metricName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the metric used in the comparison to activate the alert."
+      }
+    },
+    "operator": {
+      "type": "string",
+      "defaultValue": "GreaterThan",
+      "allowedValues": [
+        "Equals",
+        "NotEquals",
+        "GreaterThan",
+        "GreaterThanOrEqual",
+        "LessThan",
+        "LessThanOrEqual"
+      ],
+      "metadata": {
+        "description": "Operator comparing the current value with the threshold value."
+      }
+    },
+    "threshold": {
+      "type": "string",
+      "defaultValue": "0",
+      "metadata": {
+        "description": "The threshold value at which the alert is activated."
+      }
+    },
+    "timeAggregation": {
+      "type": "string",
+      "defaultValue": "Average",
+      "allowedValues": [
+        "Average",
+        "Minimum",
+        "Maximum",
+        "Total"
+      ],
+      "metadata": {
+        "description": "How the data that is collected should be combined over time."
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "microsoft.insights/metricAlerts",
+      "name": "[parameters('alertName')]",
+      "apiVersion": "2018-03-01",
+      "location": "global",
+      "tags": {},
+      "scale": null,
+      "properties": {
+        "description": "[parameters('alertDescription')]",
+        "severity": "[parameters('alertSeverity')]",
+        "enabled": true,
+        "scopes": [
+          "[concat(resourceId('Microsoft.ApiManagement/service', parameters('apimInstanceName')))]"
+        ],
+        "evaluationFrequency": "[parameters('evaluationFrequency')]",
+        "windowSize": "[parameters('windowSize')]",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "1st criterion",
+              "metricName": "[parameters('metricName')]",
+              "dimensions": [],
+              "operator": "[parameters('operator')]",
+              "threshold": "[parameters('threshold')]",
+              "timeAggregation": "[parameters('timeAggregation')]"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]",
+            "webHookProperties": {}
+          }
+        ]
+      },
+      "dependsOn": [
+      ]
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "actionGroupName": {
+      "type": "string",
+      "maxLength": 12,
+      "metadata": {
+        "description": "Name of the alert action group"
+      }
+    },
+    "emailReceiverName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the email action"
+      }
+    },
+    "emailReceiverAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Email address to use for alert notifications"
+      }
+    },
+    "webhookName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the webhook"
+      }
+    },
+    "webhookUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "URL of the webhook to post the notification to"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "microsoft.insights/actionGroups",
+      "name": "[parameters('actionGroupName')]",
+      "apiVersion": "2018-03-01",
+      "location": "Global",
+      "tags": {},
+      "scale": null,
+      "properties": {
+        "groupShortName": "[parameters('actionGroupName')]",
+        "enabled": true,
+        "emailReceivers": [
+          {
+            "name": "[parameters('emailReceiverName')]",
+            "emailAddress": "[parameters('emailReceiverAddress')]"
+          }
+        ],
+        "smsReceivers": [],
+        "webhookReceivers": [
+          {
+            "name": "[parameters('webhookName')]",
+            "serviceUri": "[parameters('webhookUrl')]"
+          }
+        ],
+        "itsmReceivers": [],
+        "azureAppPushReceivers": [],
+        "automationRunbookReceivers": [],
+        "voiceReceivers": [],
+        "logicAppReceivers": [],
+        "azureFunctionReceivers": []
+      },
+      "dependsOn": []
+    }
+  ],
+  "outputs": {}
+}

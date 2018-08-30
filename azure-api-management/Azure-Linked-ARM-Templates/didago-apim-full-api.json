@@ -1,0 +1,237 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "companyName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 8,
+      "metadata": {
+        "description": "Abbrevation of the company like"
+      }
+    },
+    "projectName": {
+      "type": "string",
+      "minLength": 2,
+      "metadata": {
+        "description": "Short description of the project"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3,
+      "allowedValues": [
+        "dev",
+        "tst",
+        "acc",
+        "prd"
+      ],
+      "metadata": {
+        "description": "Abbrevation of the environment."
+      }
+    },
+    "productName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the product"
+      }
+    },
+    "apiName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Name of the api"
+      }
+    },
+    "apiDescription": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 255,
+      "metadata": {
+        "description": "Description of the api"
+      }
+    },
+    "apiVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "metadata": {
+        "description": "Version number of the api"
+      }
+    },
+    "apiBackendServiceUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Path of the backend api"
+      }
+    },
+    "openApiFileName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the OpenApi file containing the OpenApi document"
+      }
+    },
+    "policyFileName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the policy XML file"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "constructedApiName": "[concat(parameters('productName'), '-', parameters('apiName'),'-', parameters('apiVersion'))]",
+    "constructedApiDisplayName": "[concat(parameters('productName'), '-', parameters('apiName'))]",
+    "constructedApiPath": "[concat(parameters('productName'), '/', parameters('apiName'))]",
+    "versionsetName": "[concat(parameters('productName'), '-', parameters('apiName'))]"
+  },
+  "resources": [
+    {
+      "name": "NamingConvention",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-naming-conventions.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "companyName": {
+            "value": "[parameters('companyName')]"
+          },
+          "projectName": {
+            "value": "[parameters('projectName')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('versionsetName'),'-VersionSetTemplate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-api-version-set-querystring.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": {
+            "value": "[reference('NamingConvention').outputs.apimInstanceName.value]"
+          },
+          "apiVersionSetName": {
+            "value": "[variables('versionsetName')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('constructedApiName'),'-ApiTemplate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-api.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": { "value": "[reference('NamingConvention').outputs.apimInstanceName.value]" },
+          "apiName": { "value": "[variables('constructedApiName')]" },
+          "apiDisplayName": { "value": "[variables('constructedApiDisplayName')]" },
+          "apiDescription": { "value": "[parameters('apiDescription')]" },
+          "apiPath": { "value": "[variables('constructedApiPath')]" },
+          "apiBackendServiceUrl": { "value": "[parameters('apiBackendServiceUrl')]" },
+          "apiVersion": { "value": "[parameters('apiVersion')]" },
+          "apiVersionSetName": { "value": "[variables('versionsetName')]" },
+          "policyUrl": { "value": "[concat(parameters('_artifactsLocation'), '/api-configuration/', parameters('policyFileName'), parameters('_artifactsLocationSasToken'))]" }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('versionsetName'),'-VersionSetTemplate'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('constructedApiName'),'-ApiOpenApiImportTemplate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-api-openapi-import.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": { "value": "[reference('NamingConvention').outputs.apimInstanceName.value]" },
+          "apiName": { "value": "[variables('constructedApiName')]" },
+          "apiPath": { "value": "[variables('constructedApiPath')]" },
+          "openApiUrl": { "value": "[concat(parameters('_artifactsLocation'), '/api-configuration/', parameters('openApiFileName'), parameters('_artifactsLocationSasToken'))]" }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('constructedApiName'),'-ApiTemplate'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('constructedApiName'),'-ApiTemplateUpdate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-api.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": { "value": "[reference('NamingConvention').outputs.apimInstanceName.value]" },
+          "apiName": { "value": "[variables('constructedApiName')]" },
+          "apiDisplayName": { "value": "[variables('constructedApiDisplayName')]" },
+          "apiDescription": { "value": "[parameters('apiDescription')]" },
+          "apiPath": { "value": "[variables('constructedApiPath')]" },
+          "apiBackendServiceUrl": { "value": "[parameters('apiBackendServiceUrl')]" },
+          "apiVersion": { "value": "[parameters('apiVersion')]" },
+          "apiVersionSetName": { "value": "[variables('versionsetName')]" },
+          "policyUrl": { "value": "[concat(parameters('_artifactsLocation'), '/api-configuration/', parameters('policyFileName'), parameters('_artifactsLocationSasToken'))]" }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('versionsetName'),'-VersionSetTemplate'))]",
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('constructedApiName'),'-ApiTemplate'))]",
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('constructedApiName'),'-ApiOpenApiImportTemplate'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('constructedApiName'), '-ApiProductTemplate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-api-product.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimInstanceName": { "value": "[reference('NamingConvention').outputs.apimInstanceName.value]" },
+          "productName": { "value": "[parameters('productName')]" },
+          "apiName": { "value": "[variables('constructedApiName')]" }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('constructedApiName'),'-ApiOpenApiImportTemplate'))]",
+        "[resourceId('Microsoft.Resources/deployments', concat(variables('constructedApiName'),'-ApiTemplateUpdate'))]"
+      ]
+    }
+  ]
+}

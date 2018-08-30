@@ -1,0 +1,41 @@
+<!--
+    IMPORTANT:
+    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.
+    - Only the <forward-request> policy element can appear within the <backend> section element.
+    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.
+    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.
+    - To add a policy position the cursor at the desired insertion point and click on the round button associated with the policy.
+    - To remove a policy, delete the corresponding policy statement from the policy document.
+    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.
+    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.
+    - Policies are applied in the order of their appearance, from the top down.
+-->
+<policies>
+  <inbound>
+    <trace source="Inbound">Inbound trace for Example API</trace>
+    <cors>
+      <allowed-origins>
+        <origin>*</origin>
+        <!-- allow any -->
+        <!-- OR a list of one or more specific URIs (case-sensitive) -->
+        <!--<origin>URI</origin>  URI must include scheme, host, and port. If port is omitted, 80 is assumed for http and 443 is assumed for https. -->
+      </allowed-origins>
+      <allowed-methods>
+        <!-- allow any -->
+        <method>*</method>
+      </allowed-methods>
+      <allowed-headers>
+        <!-- allow any -->
+        <header>*</header>
+      </allowed-headers>
+    </cors>
+    <base />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <trace source="Outbound">Outbound trace for Example API</trace>
+    <base />
+  </outbound>
+</policies>

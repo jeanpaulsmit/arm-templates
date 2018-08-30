@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimInstanceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the APIM instance"
+            }
+        },
+        "apiName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the api to import"
+            }
+        },
+        "apiPath": {
+            "type": "string",
+            "metadata": {
+                "description": "Path prefix to identify the API in APIM"
+            }
+        },
+        "openApiUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "URL where to find the OpenApi documentation"
+            }
+        }
+    },
+    "variables": { },
+    "resources": [
+        {
+            "type": "Microsoft.ApiManagement/service/apis",
+            "name": "[concat(parameters('apimInstanceName'), '/', parameters('apiName'))]",
+            "apiVersion": "2017-03-01",
+            "scale": null,
+            "properties": {
+                "path": "[parameters('apiPath')]",
+                "protocols": [
+                    "https"
+                ],
+                "contentFormat": "swagger-link-json",
+                "contentValue": "[parameters('openApiUrl')]"
+            }
+        } 
+    ]
+}

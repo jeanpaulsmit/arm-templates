@@ -1,0 +1,118 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "companyName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Abbrevation of the company like"
+            }
+        },
+        "projectName": {
+            "type": "string",
+            "minLength": 2,
+            "metadata": {
+                "description": "Short description of the project"
+            }
+        },
+        "environment": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3,
+            "allowedValues": [
+                "dev",
+                "tst",
+                "acc",
+                "prd"
+            ],
+            "metadata": {
+                "description": "Abbrevation of the environment."
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "metadata": {
+                "description": "Metadata for this resource"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage Account type"
+            }
+        },
+        "storageAccountTier": {
+            "type": "string",
+            "defaultValue": "Standard",
+            "allowedValues": [
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "Storage Account tier"
+            }
+        }
+    },
+    "variables": {
+        "shortLocation": "[replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(resourceGroup().location, 'eastasia', 'ea'), 'southeastasia', 'sea'), 'centralus', 'cu'), 'eastus', 'eu'), 'eastus2', 'eu2'), 'westus', 'wu'), 'northcentralus', 'ncu'), 'southcentralus', 'scu'),'northeurope','ne'), 'westeurope', 'we'), 'japanwest', 'jw'), 'japaneast', 'je'), 'brazilsouth', 'bs'), 'australiaeast', 'ae'), 'australiasoutheast', 'ase'), 'canadacentral', 'cc'), 'canadaeast', 'ce'), 'uksouth', 'us'), 'ukwest', 'uw'), 'westcentralus', 'wcu'), 'westus2', 'wu2')]",
+        "storageAccountName": "[concat(parameters('companyName'),parameters('projectName'),'sa',parameters('environment'),variables('shortLocation'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "[parameters('storageAccountType')]",
+                "tier": "[parameters('storageAccountTier')]"
+            },
+            "kind": "StorageV2",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+              "displayName": "Storage account for linked ARM templates",
+              "department": "[parameters('metadata').department]",
+              "projectName": "[parameters('metadata').projectName]",
+              "owner": "[parameters('metadata').owner]",
+              "environment": "[parameters('metadata').environment]"
+            },
+            "scale": null,
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            },
+            "dependsOn": []
+        }
+    ],
+    "outputs": {
+        "storageAccountName": {
+            "type": "string",
+            "value": "[variables('storageAccountName')]"
+        }
+    }
+}

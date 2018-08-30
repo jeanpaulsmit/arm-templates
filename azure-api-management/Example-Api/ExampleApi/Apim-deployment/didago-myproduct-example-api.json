@@ -1,0 +1,144 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "companyName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 8,
+      "defaultValue": "didago",
+      "metadata": {
+        "description": "Abbrevation of the company"
+      }
+    },
+    "projectName": {
+      "type": "string",
+      "minLength": 2,
+      "defaultValue": "apim",
+      "metadata": {
+        "description": "Short description of the project"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3,
+      "allowedValues": [
+        "dev",
+        "tst",
+        "acc",
+        "prd"
+      ],
+      "metadata": {
+        "description": "Abbrevation of the environment."
+      }
+    },
+    "productName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the product"
+      }
+    },
+    "apiName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Name of the api"
+      }
+    },
+    "apiDescription": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 255,
+      "metadata": {
+        "description": "Description of the api"
+      }
+    },
+    "apiVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "metadata": {
+        "description": "Version number of the api"
+      }
+    },
+    "apiBackendServiceUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Path of the backend api"
+      }
+    },
+    "openApiFileName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the OpenApi file containing the OpenApi document"
+      }
+    },
+    "policyFileName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the policy XML file"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring"
+    }
+  },
+  "variables": { },
+  "resources": [
+    {
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('apiName'),'-ApiMasterTemplate')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/linked-arm-templates/didago-apim-full-api.json', parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "companyName": {
+            "value": "[parameters('companyName')]"
+          },
+          "projectName": {
+            "value": "[parameters('projectName')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "productName": {
+            "value": "[parameters('productName')]"
+          },
+          "apiName": {
+            "value": "[parameters('apiName')]"
+          },
+          "apiDescription": {
+            "value": "[parameters('apiDescription')]"
+          },
+          "apiVersion": {
+            "value": "[parameters('apiVersion')]"
+          },
+          "apiBackendServiceUrl": {
+            "value": "[parameters('apiBackendServiceUrl')]"
+          },
+          "openApiFileName": {
+            "value": "[parameters('openApiFileName')]"
+          },
+          "policyFileName": {
+            "value": "[parameters('policyFileName')]"
+          },
+          "_artifactsLocation": {
+            "value": "[parameters('_artifactsLocation')]"
+          },
+          "_artifactsLocationSasToken": {
+            "value": "[parameters('_artifactsLocationSasToken')]"
+          }
+        }
+      }
+    }
+  ]
+}

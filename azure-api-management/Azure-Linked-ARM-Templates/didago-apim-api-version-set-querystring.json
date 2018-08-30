@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimInstanceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the APIM instance"
+            }
+        },
+        "apiVersionSetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the version set"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ApiManagement/service/api-version-sets",
+            "name": "[concat(parameters('apimInstanceName'), '/', parameters('apiVersionSetName'))]",
+            "apiVersion": "2017-03-01",
+            "properties": {
+                "description": "[concat('Version set for ', parameters('apiVersionSetName'))]",
+                "versionQueryName": "api-version",
+                "displayName": "[parameters('apiVersionSetName')]",
+                "versioningScheme": "query"
+            }
+        }
+    ]
+}

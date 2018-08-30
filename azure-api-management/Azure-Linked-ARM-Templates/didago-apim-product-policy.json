@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimInstanceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the APIM instance"
+      }
+    },
+    "productNames": {
+      "type": "array",
+      "metadata": {
+        "description": "List of product names to assign the policy to"
+      }
+    },
+    "policyUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Url of the policy to apply, product name will be replace while processing"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ApiManagement/service/products/policies",
+      "name": "[concat(parameters('apimInstanceName'), '/', parameters('productNames')[copyIndex()], '/policy')]",
+      "apiVersion": "2018-01-01",
+      "scale": null,
+      "properties": {
+        "policyContent": "[replace(parameters('policyUrl'), '$$productname$$', tolower(parameters('productNames')[copyIndex()]))]",
+        "contentFormat": "rawxml-link"
+      },
+      "copy": {
+        "name": "productspolicycopy",
+        "count": "[length(parameters('productNames'))]"
+      }
+    }
+  ]
+}

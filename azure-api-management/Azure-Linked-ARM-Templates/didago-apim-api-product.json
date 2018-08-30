@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimInstanceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the APIM instance"
+            }
+        },
+        "productName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the product"
+            }
+        },
+        "apiName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the api to link to the product"
+            }
+        }
+    },
+    "variables": { },
+    "resources": [
+        {
+            "type": "Microsoft.ApiManagement/service/products/apis",
+            "name": "[concat(parameters('apimInstanceName'), '/', parameters('productName'),'/', parameters('apiName'))]",
+            "apiVersion": "2017-03-01",
+            "scale": null,
+            "properties": {}
+        } 
+    ]
+}

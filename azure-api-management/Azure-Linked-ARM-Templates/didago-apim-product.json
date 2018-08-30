@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimInstanceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the APIM instance"
+      }
+    },
+    "productNames": {
+      "type": "array",
+      "metadata": {
+        "description": "List of product names to create"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ApiManagement/service/products",
+      "name": "[concat(parameters('apimInstanceName'), '/', parameters('productNames')[copyIndex()])]",
+      "apiVersion": "2017-03-01",
+      "scale": null,
+      "properties": {
+        "displayName": "[parameters('productNames')[copyIndex()]]",
+        "description": "[concat('Product containing all APIs for ', parameters('productNames')[copyIndex()])]",
+        "terms": null,
+        "state": "published",
+        "subscriptionRequired": true,
+        "approvalRequired": true,
+        "subscriptionsLimit": 1
+      },
+      "copy": {
+        "name": "productscopy",
+        "count": "[length(parameters('productNames'))]"
+      }
+    }
+  ]
+}

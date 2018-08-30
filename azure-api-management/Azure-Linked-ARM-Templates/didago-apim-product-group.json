@@ -1,0 +1,52 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimInstanceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the APIM instance"
+      }
+    },
+    "productName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of product to assign the AD group to"
+      }
+    },
+    "groupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the AD group to assign to the APIM instance"
+      }
+    },
+    "adTenantName": {
+      "type": "string",
+      "metadata": {
+        "description": "Full name of the tenant where the AAD group lives, typically <tenantname>.onmicrosoft.com"
+      }
+    },
+    "adGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Id of the AAD group object"
+      }
+    }
+  },
+    "variables": { },
+    "resources": [
+      {
+          "type": "Microsoft.ApiManagement/service/products/groups",
+          "name": "[concat(parameters('apimInstanceName'), '/', parameters('productName'), '/', parameters('groupName'))]",
+          "apiVersion": "2018-01-01",
+          "scale": null,
+          "properties": {
+            "displayName": "[parameters('groupName')]",
+            "description": "[concat('AD group for ', parameters('productName'))]",
+            "type": "external",
+            "externalId": "[concat('aad://', parameters('adTenantName'),'/groups/',parameters('adGroupId')"
+          }
+        }
+    ],
+    "outputs": { }
+}

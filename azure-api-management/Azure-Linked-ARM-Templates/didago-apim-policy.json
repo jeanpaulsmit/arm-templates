@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimInstanceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the APIM instance"
+            }
+        },
+        "policyUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "Url of the policy to apply"
+            }
+        }
+    },
+    "variables": { },
+    "resources": [
+        {
+            "type": "Microsoft.ApiManagement/service/policies",
+            "name": "[concat(parameters('apimInstanceName'), '/policy')]",
+            "apiVersion": "2018-01-01",
+            "scale": null,
+            "properties": {
+              "policyContent": "[parameters('policyUrl')]",
+              "contentFormat": "rawxml-link"
+            }
+        }
+    ]
+}
