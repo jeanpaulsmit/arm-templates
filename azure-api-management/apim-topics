@@ -1,0 +1,24 @@
+	- Infrastructure
+		○ Capacity management (tier, scaling)
+		○ Connectivity of services (cloud, on-prem)
+		○ Configuration (off, internal, external)
+		○ User management (AAD?)
+		○ Custom domains (one for dev portal if oob)
+
+	- API management
+		○ Products (URL design, needs to be unique - no two profile services possible on same URL)
+		○ API versioning
+		○ Request/response headers, CORS
+		○ OpenAPI (generating on build or publicly accessible)
+		○ Policies (global, product, API)
+			§ Rate limit
+		○ CI/CD
+		○ User management (APIM groups linked to AAD)
+		○ Authentication/authorization
+		○ Monitoring (application insights, eventhub)
+		○ Marlink API's, 3rd party API's
+		
+	- Developer portal
+		○ Look and feel
+		○ User account management
+    Subscription key management (self service?)
